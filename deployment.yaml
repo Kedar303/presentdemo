@@ -1,60 +1,52 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: demo
-  name: demo
-  namespace: presentdemo
+  name: nginx-deployment
 spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 10
+  replicas: 3
   selector:
     matchLabels:
-      app: demo
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      app: nginx
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        app: demo
+        app: nginx
     spec:
       containers:
-      - image: nginx
-        imagePullPolicy: Always
-        name: app-js-demo
-        resources:
-          limits:
-            cpu: 200m
-            memory: 512Mi
-          requests:
-            cpu: 100m
-            memory: 256Mi
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
 ---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-deployment
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 20 # Adjust the CPU utilization percentage as needed
+
+---
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: demo
-  namespace: presentdemo
-  labels:
-    app: demo
+  name: nginx-service
 spec:
   type: NodePort
   ports:
     - port: 80
       targetPort: 80
+      nodePort: 30090 # Set your desired nodePort value here
   selector:
-    app: demo
+    app: nginx
 
