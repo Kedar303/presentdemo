@@ -7,6 +7,11 @@ spec:
   selector:
     matchLabels:
       app: nginx
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -17,10 +22,11 @@ spec:
         image: nginx:latest
         ports:
         - containerPort: 80
-      resources:
-        requests:
-          cpu: "250m" # Initial CPU request
-          memory: "64Mi" # Initial memory request
-        limits:
-          cpu: "500m" # Maximum CPU limit
-          memory: "128Mi" # Maximum memory limit
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      
