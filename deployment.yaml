@@ -17,36 +17,8 @@ spec:
         image: nginx:latest
         ports:
         - containerPort: 80
----
-apiVersion: autoscaling/v2beta1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: nginx-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: nginx-deployment
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      targetAverageUtilization: 20 # Adjust the CPU utilization percentage as needed
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx-service
-spec:
-  type: NodePort
-  ports:
-    - port: 80
-      targetPort: 80
-      nodePort: 30090 # Set your desired nodePort value here
-  selector:
-    app: nginx
-
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
